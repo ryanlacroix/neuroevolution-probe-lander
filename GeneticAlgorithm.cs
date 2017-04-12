@@ -26,8 +26,6 @@ public class GeneticAlgorithm : MonoBehaviour {
             return newPop;
         }
 
-        // BEGIN EVOLUTIONARY FUNCTIONS
-
         // Call this at the end of each trial
         public double calcFitness(Individual ind, GameObject pr)
         {
@@ -57,7 +55,6 @@ public class GeneticAlgorithm : MonoBehaviour {
 
         public Population mutatePopulation(Population pop)
         {
-            // Still need to figure out how to mutate
             return pop;
         }
 
@@ -92,9 +89,7 @@ public class GeneticAlgorithm : MonoBehaviour {
 
                 if (this.crossoverRate > this.rand.NextDouble() && i > elitismCount)
                 {
-                    //Individual offspring;
-                    // instead of make child now, start building weights and biases
-                    // then make the child with those as arguments
+                    // Build weights and biases for use in a new child
                     Individual p2;
                     p2 = selectParent(pop);
                     // Build genome of child
@@ -121,9 +116,8 @@ public class GeneticAlgorithm : MonoBehaviour {
             }
             return pop;
         }
-
-        // END EVOLUTIONARY FUNCTIONS
     }
+
     public class Population
     {
         public List<Individual> population;
@@ -148,7 +142,7 @@ public class GeneticAlgorithm : MonoBehaviour {
         // Return the fittest individual in this population
         // Possibly redundant now that sortPopulation() implememnted
         public int getFittest()
-        { // MARKED AS POSSIBLY REDUNDANT.
+        {
             Individual fittest = this.population[0];
             int fittestIndex = 0;
             for (int i = 0; i < this.population.Count; i++)
@@ -160,11 +154,11 @@ public class GeneticAlgorithm : MonoBehaviour {
                 }
             }
             return fittestIndex;
-        } // MARKED AS POSSIBLY REDUNDANT.
+        }
 
-        // Call this AFTER evaluating fitness
+        // Call this after evauating fitness
         // Sorts population based on fitness, best being at index 0
-        //Not worried about runtime. This only happens once per generation
+        // Not too concerned about runtime. This only happens once per generation
         public void sortPopulation()
         {
             Individual temp;
@@ -198,6 +192,7 @@ public class GeneticAlgorithm : MonoBehaviour {
             this.network = new NeuralNetwork.Network(new int[] { 2, 10, 4 }, weights, biases);
             this.fitness = 0; // Must be set after evaluation
         }
+
         // Constructor for evolved populations
         public Individual(List<NeuralNetwork.Weight> w, List<NeuralNetwork.Bias> b)
         {
@@ -216,7 +211,6 @@ public class GeneticAlgorithm : MonoBehaviour {
     public GenAlgo gen;
     public Population pop;
     public GameObject probePrefab;
-    private GameObject probe; // Actual current instantiation of object
     public int generation;
     public int currInd;
     public bool running;
@@ -242,8 +236,6 @@ public class GeneticAlgorithm : MonoBehaviour {
         currInd = 0;
         probes = new List<GameObject>();
         fittestIndex = 0;
-        
-        //gen.evalPopulation(population, probePrefab);
 	}
 
     // Update is called once per frame
@@ -283,9 +275,10 @@ public class GeneticAlgorithm : MonoBehaviour {
             }
             if (allProbesLanded == true)
             {
-                // Testing genome printer
+                // Save the population genomes to XML file
                 stateSaver.save(pop);
-                // End testing genome printer
+
+                // Calculate generation fitness and destroy probes
                 running = false;
                 for (int i = 0; i < pop.popSize; i++)
                 {
@@ -300,45 +293,4 @@ public class GeneticAlgorithm : MonoBehaviour {
                 
         }
     }
-} /*
-This code is for running the probes individually
-Not needed anymore
-void Update()
-{
-    // Check if an experiment is not currently running
-    if (!running)
-    { // Set up an experiment
-      // Check if at end of population. Need to evolve + mutate
-        if (currInd == pop.population.Count)
-        {
-            Debug.Log("Generation " + generation + " complete. Assessing..");
-            currInd = 0;
-            pop = gen.crossoverPopulation(pop);
-            gen.evalPopulation(pop);
-            generation++;
-
-        }
-        running = true;
-        probe = (GameObject)Instantiate(probePrefab);
-        ProbeControl probeController = probe.GetComponent<ProbeControl>();
-        // insert neural network into game object
-        probeController.network = pop.population[currInd].network;
-        // Assess next individual
-        //Debug.Log(currInd);
-        //currInd++;
-
-    }
-    else
-    {
-        // Testing. Set actual definition of end of experiment later
-        if (probe.transform.position.y < 4)
-        { // The probe has landed
-            running = false;
-            pop.population[currInd].fitness = gen.calcFitness(pop.population[currInd], probe);
-            // Debug.Log(pop.population[currInd].fitness);
-            Destroy(probe);
-            currInd++;
-        }
-    }
 }
-*/

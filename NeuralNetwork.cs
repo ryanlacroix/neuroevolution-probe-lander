@@ -124,6 +124,8 @@ public class NeuralNetwork : MonoBehaviour {
                     newLayer.nodes.Add(newNode);
                     allBias.Add(newBias);
                 }
+
+                // Assign weights to all nodes
                 newLayer.nodes.ForEach((node) =>
                 {
                     // Input nodes
@@ -139,6 +141,7 @@ public class NeuralNetwork : MonoBehaviour {
                         {
                             Weight newWeight = new Weight(Util.GetRandom() * (2) - 1);
                             node.weights.Add(newWeight);
+                            // Add to master list
                             allWeights.Add(newWeight);
                         }
                     }
@@ -193,6 +196,7 @@ public class NeuralNetwork : MonoBehaviour {
                     }
                 }
             }
+
             // Prepare the output values to be returned
             Layer lastLayer = this.layers[this.layers.Count - 1];
             float[] output = new float[lastLayer.nodes.Count];

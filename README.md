@@ -12,12 +12,12 @@ The network learns best training it one task at a time, each building upon the l
 
 Default configuration
 ---------------------
-*__Genetic Algorithm__
---*The genetic algorithm has a default of 50 individuals, mutation rate of 10%, corssover rate of 95% and elitism count of 10. After a fair bit of trial and error I have found these values to evolve the probes most effectively.
---*These values can be modified in the `GenAlgo` constructor found in the `Start()` function of `GeneticAlgorithm.cs`
++ __Genetic Algorithm__
+  * The genetic algorithm has a default of 50 individuals, mutation rate of 10%, corssover rate of 95% and elitism count of 10. After a fair bit of trial and error I have found these values to evolve the probes most effectively.
+  * These values can be modified in the `GenAlgo` constructor found in the `Start()` function of `GeneticAlgorithm.cs`
 
-*__Neural Network__
---*Neural networks are initiliazed with one hidden layer of 10 nodes, 2 inputs and 4 outputs. Different configurations have not yet been tested properly, and so this configuration is likely unoptimal. Any size network can be achieved by changing the `Network` constructor parameters within the `Individual` constructor implementations found within the `GeneticAlgorithm.cs` file. `Network` structure is defined using a list of `int`s, where the first and last values are the input and output layers respectively.
++ __Neural Network__
+  * Neural networks are initiliazed with one hidden layer of 10 nodes, 2 inputs and 4 outputs. Different configurations have not yet been tested properly, and so this configuration is likely unoptimal. Any size network can be achieved by changing the `Network` constructor parameters within the `Individual` constructor implementations found within the `GeneticAlgorithm.cs` file. `Network` structure is defined using a list of `int`s, where the first and last values are the input and output layers respectively.
 
 Note
 ----

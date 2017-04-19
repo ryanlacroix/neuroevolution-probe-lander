@@ -10,6 +10,7 @@ public class GeneticAlgorithm : MonoBehaviour {
         public double crossoverRate;
         public int elitismCount;
         private System.Random rand;
+        private float fitnessThreshold1 = 0.4f;
 
         public GenAlgo(int size, double mut, double cross, int elite)
         {
@@ -27,14 +28,23 @@ public class GeneticAlgorithm : MonoBehaviour {
         }
 
         // Call this at the end of each trial
-        public double calcFitness(Individual ind, GameObject pr)
+        public double calcFitness(Individual ind, GameObject pr, double populationFitness)
         {
-            // Fitness function for first aspect of training
-            // Teaches probes to impact as close to target as possible
             ProbeInstr instruments = pr.GetComponent<ProbeInstr>();
-            double totalScore = 1000;
-            totalScore = instruments.getDistanceToTarget();
-            return 1 / totalScore;
+            double totalScoreVel;
+            double totalScoreDist;
+            totalScoreVel = instruments.impactVelocity;
+
+            totalScoreDist = instruments.getDistanceToTarget();
+
+            // Remove better than perfect scores -> within 10m is considered perfect
+            // Encourage probes to focus on impact speed once target is found
+            if (totalScoreDist < 20)
+                totalScoreDist = 20;
+
+            // Put a larger emphasis on lowering impact velocity
+            // This should even it out a little better
+            return System.Math.Min(((1 / totalScoreVel)*10 + (1 / totalScoreDist)*6), 1);
         }
 
         public void evalPopulation(Population pop)
@@ -53,8 +63,42 @@ public class GeneticAlgorithm : MonoBehaviour {
             Debug.Log("Best probe: " + bestFitness);
         }
 
+        // Mutate the population based on random probabilities
         public Population mutatePopulation(Population pop)
         {
+            pop.sortPopulation();
+            // Iterate through individuals
+            for (int i = 0; i < pop.popSize; i++)
+            {
+                Individual p1 = pop.population[i];
+
+                // Determine if this individual should mutate
+                if (i > elitismCount && this.rand.NextDouble() < mutationRate)
+                {
+                    // What percentage of the genes should mutate
+                    double mutateAmount = this.rand.NextDouble();
+                    // Build genome of child
+                    List<NeuralNetwork.Weight> childWeights = new List<NeuralNetwork.Weight>();
+                    List<NeuralNetwork.Bias> childBiases = new List<NeuralNetwork.Bias>();
+
+                    for (int o = 0; o < p1.weights.Count; o++)
+                    { // Build weights
+                        if (rand.NextDouble() > mutateAmount)
+                            childWeights.Add(new NeuralNetwork.Weight(NeuralNetwork.Util.GetRandom() * (2) - 1));
+                        else
+                            childWeights.Add(p1.weights[o]);
+                    }
+                    for (int o = 0; o < p1.biases.Count; o++)
+                    { // Build biases
+                        if (rand.NextDouble() > mutateAmount)
+                            childBiases.Add(new NeuralNetwork.Bias(NeuralNetwork.Util.GetRandom() * (2) - 1));
+                        else
+                            childBiases.Add(p1.biases[o]);
+                    }
+
+                    pop.population[i] = new Individual(childWeights, childBiases);
+                }
+            }
             return pop;
         }
 
@@ -86,7 +130,6 @@ public class GeneticAlgorithm : MonoBehaviour {
                 Individual p1 = pop.population[i];
 
                 // Determine if this individual should breed
-
                 if (this.crossoverRate > this.rand.NextDouble() && i > elitismCount)
                 {
                     // Build weights and biases for use in a new child
@@ -189,7 +232,7 @@ public class GeneticAlgorithm : MonoBehaviour {
         {
             weights = new List<NeuralNetwork.Weight>();
             biases = new List<NeuralNetwork.Bias>();
-            this.network = new NeuralNetwork.Network(new int[] { 2, 10, 4 }, weights, biases);
+            this.network = new NeuralNetwork.Network(new int[] { 2, 10, 5 }, weights, biases);
             this.fitness = 0; // Must be set after evaluation
         }
 
@@ -198,7 +241,7 @@ public class GeneticAlgorithm : MonoBehaviour {
         {
             weights = new List<NeuralNetwork.Weight>();
             biases = new List<NeuralNetwork.Bias>();
-            this.network = new NeuralNetwork.Network(new int[] { 2, 10, 4 }, weights, biases);
+            this.network = new NeuralNetwork.Network(new int[] { 2, 10, 5 }, weights, biases);
             // Replace weights and biases with evolved ones
             for (int i = 0; i < weights.Count; i++)
                 weights[i] = w[i];
@@ -218,12 +261,13 @@ public class GeneticAlgorithm : MonoBehaviour {
     public Camera mainCam;
     private int fittestIndex;
     private StateSaver<Population> stateSaver;
+    public float fitnessThreshold1;
 
 	// Use this for initialization
 	void Start () {
-        stateSaver = new StateSaver<Population>(@"C:\Users\ryan\Desktop\population.xml");
+        stateSaver = new StateSaver<Population>(@"population.xml");
         // Create initial population
-        gen = new global::GeneticAlgorithm.GenAlgo(50, 0.10, 0.95, 10);
+        gen = new global::GeneticAlgorithm.GenAlgo(50, 0.05, 0.95, 5);
 
         // Load last evolved population if one exists
         if (stateSaver.hasPriorSave())
@@ -283,7 +327,7 @@ public class GeneticAlgorithm : MonoBehaviour {
                 for (int i = 0; i < pop.popSize; i++)
                 {
                     pop.population[i].fitness = gen.calcFitness(pop.population[i],
-                        probes[i]);
+                        probes[i], pop.popFitness);
                     Destroy(probes[i]);
                 }
                 probes.Clear();

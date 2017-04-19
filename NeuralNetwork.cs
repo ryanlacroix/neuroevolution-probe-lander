@@ -56,13 +56,6 @@ public class NeuralNetwork : MonoBehaviour {
     public class Layer
     {
         public List<Node> nodes;
-        public int nodeCount
-        {
-            get
-            {
-                return nodes.Count;
-            }
-        }
         public Layer(int numNodes)
         {
             nodes = new List<Node>(numNodes);
@@ -77,13 +70,6 @@ public class NeuralNetwork : MonoBehaviour {
         // For XmlSerialize use only
         public Network() { }
         public List<Layer> layers { get; set; }
-        public int numLayers
-        {
-            get
-            {
-                return layers.Count;
-            }
-        }
 
         // Returns a representation of the network state
         public List<List<double>> getNetworkState()
@@ -165,7 +151,7 @@ public class NeuralNetwork : MonoBehaviour {
         private float[] update(List<double> input)
         {
             // Ensure inputs are correct
-            if (input.Count != this.layers[0].nodeCount)
+            if (input.Count != this.layers[0].nodes.Count)
             {
                 Debug.Log("Incorrect number of inputs to network");
                 return null;

@@ -16,6 +16,8 @@ public class ProbeInstr : MonoBehaviour {
     public Vector3 startPosition;
     // Add in total variance from path every step
     public double totalPathVariance;
+    public float impactVelocity;
+    private bool landed;
 
     void Start () {
         thisObj = GetComponent<Rigidbody>();
@@ -25,8 +27,11 @@ public class ProbeInstr : MonoBehaviour {
         speed = thisObj.velocity.magnitude;
         startPosition = thisObj.position;
         totalPathVariance = 0;
+        landed = false;
+        impactVelocity = 0f;
 
 	}
+
 	public float[] getReadings()
     {
         // Initially only train with two inputs
@@ -38,17 +43,22 @@ public class ProbeInstr : MonoBehaviour {
     }
 	// Update is called once per frame
 	void Update () {
+        if (thisObj.position.y < 4 && landed == false)
+        {
+            impactVelocity = speed;
+            landed = true;
+        }
         if (frameCounter >= updateRate)
         {
             // Add path variance to total
-            updatePathVariance();
+            //updatePathVariance();
             updateSpeed();
             frameCounter = -1; 
         }
         frameCounter++;
 	}
 
-    private int getPhase()
+    public int getPhase()
     {
         if (thisObj.position.y < phase3Height)
             return 3;
@@ -65,13 +75,13 @@ public class ProbeInstr : MonoBehaviour {
     }
 
     // Calculates how far from optimal path the probe is, adds this to total variance
-    private void updatePathVariance()
+    /*private void updatePathVariance()
     {
         double currVariance = UnityEditor.HandleUtility.DistancePointLine(thisObj.position, startPosition,
             target.GetComponent<Transform>().position);
         if (currVariance > 50)
             totalPathVariance += currVariance;
-    }
+    } */
 
     private void updateSpeed()
     {

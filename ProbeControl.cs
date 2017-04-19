@@ -22,6 +22,10 @@ public class ProbeControl : MonoBehaviour {
 	void Update () {
         // Only for use in testing
         checkForInput();
+
+        // Stop the jet graphic if stationary
+        //if (instruments.getSpeed() < 1)
+            //thisJet.Stop();
     }
     void FixedUpdate()
     {
@@ -38,6 +42,11 @@ public class ProbeControl : MonoBehaviour {
             cruiseTowardTarget(outputs[1]);
             centerOnTarget(outputs[2]);
             fireThruster(outputs[3]);
+            goVertical(outputs[4]);
+        }
+        else
+        {
+            thisJet.Stop();
         }
     }
 
@@ -63,7 +72,7 @@ public class ProbeControl : MonoBehaviour {
             rollRight();
         } if (Input.GetKey(KeyCode.S))
         {
-            pitchUp();
+            goVertical(1f);
         } if (Input.GetKey(KeyCode.W))
         {
             pitchDown();
@@ -104,7 +113,6 @@ public class ProbeControl : MonoBehaviour {
             jetFiring = false;
             thisJet.Stop();
         }
-
     }
     void centerOnTarget(float strength)
     {
@@ -134,6 +142,16 @@ public class ProbeControl : MonoBehaviour {
             Quaternion targetRotation;
             Vector3 direction = (targetObj.position - thisObj.transform.position);
             targetRotation = Quaternion.FromToRotation(thisObj.transform.up, direction);
+            thisObj.transform.rotation = Quaternion.Lerp(thisObj.transform.rotation, targetRotation, Time.deltaTime * 1f);
+        }
+    }
+    void goVertical(float strength)
+    {
+        if (strength > 0.5)
+        {
+            Quaternion targetRotation;
+            Vector3 direction = Vector3.up;
+            targetRotation = Quaternion.FromToRotation(Vector3.up, direction);
             thisObj.transform.rotation = Quaternion.Lerp(thisObj.transform.rotation, targetRotation, Time.deltaTime * 1f);
         }
     }

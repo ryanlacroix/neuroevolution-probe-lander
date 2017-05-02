@@ -1,7 +1,9 @@
 NeuroEvolved Probe Lander
 ===========================
 
-![](images/3resized.jpg?raw=true)
+<p align="center">
+	<img src="images/3resized.jpg?raw=true"/>
+</p>
 
 Uses a genetic algorithm to evolve the weights and biases of a neural network. The network controls a probe as it comes in for its final stage of landing. The genetic algorithm represents each probe's genome using lists of doubles. Neural networks are constructed at the beginning of each generation based on crossover and mutations of the previous generation's genomes. Rather than having full control over every actuator on the probe (which proved to have too steep a learning curve for the network to grasp), networks have access to different pre-defined maneuvres. These include firing main retro thrusters, turning toward the target landing location, turning away from target landing location, turning 90 degrees above the target (for cruising), and aiming main thrusters towards the ground. Any of the actions can be carried out at the same time to different degrees, giving the network the ability to make new maneuvres by combining predefined ones. Each maneuvre can be carried out at any strength the network wishes.
 
